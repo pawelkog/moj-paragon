@@ -18,9 +18,14 @@
     }
     html, body { min-height: 100%; background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); -webkit-tap-highlight-color: transparent; }
     .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: env(safe-area-inset-bottom, 24px); }
-    header { padding: 52px 24px 20px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+    header { padding: 52px 24px 16px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
     header h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.01em; }
-    header p { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+    .header-sub { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+    header p { font-size: 13px; color: var(--text-dim); }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: inline-block; margin-right: 5px; }
+    .sync-dot.ok { background: #2d5a27; }
+    .sync-dot.err { background: #c0392b; }
+    .sync-label { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; }
     .tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid var(--border); }
     .tab { padding: 10px 20px; font-size: 14px; color: var(--text-dim); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
@@ -31,7 +36,9 @@
     .setup-card p { font-size: 13px; color: #4a7a44; margin-bottom: 12px; line-height: 1.5; }
     .key-row { display: flex; gap: 8px; }
     .key-row input { flex: 1; padding: 10px 14px; border: 1px solid #b8d4b4; border-radius: 10px; font-size: 13px; font-family: monospace; background: white; color: var(--text); }
-    .key-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .name-row { display: flex; gap: 8px; }
+    .name-row input { flex: 1; padding: 10px 14px; border: 1px solid #b8d4b4; border-radius: 10px; font-size: 14px; background: white; color: var(--text); }
+    .btn-small { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
     .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; background: var(--surface); position: relative; }
     .upload-zone:active { background: var(--accent-light); border-color: var(--accent); }
     .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
@@ -44,7 +51,6 @@
     .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 16px; transition: opacity 0.2s, transform 0.1s; }
     .btn-primary:active { transform: scale(0.98); opacity: 0.85; }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-small { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
     .loading { display: none; text-align: center; padding: 32px; }
     .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -55,11 +61,10 @@
     .result-header h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; }
     .result-header .date { font-size: 12px; color: var(--text-dim); }
     .result-store { padding: 12px 20px; background: var(--accent-light); font-size: 14px; font-weight: 500; color: var(--accent); }
-    .items-list { padding: 8px 0; }
     .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
     .item-row:last-child { border-bottom: none; }
-    .item-name { flex: 1; color: var(--text); }
-    .item-price { font-weight: 500; color: var(--text); margin-left: 12px; white-space: nowrap; }
+    .item-name { flex: 1; }
+    .item-price { font-weight: 500; margin-left: 12px; white-space: nowrap; }
     .total-row { display: flex; justify-content: space-between; padding: 16px 20px; border-top: 2px solid var(--text); font-weight: 500; font-size: 16px; }
     .error-box { background: #fdf0ef; border: 1px solid #f5c6c2; border-radius: var(--radius); padding: 16px 20px; font-size: 14px; color: var(--danger); margin-top: 16px; }
     .history-empty { text-align: center; padding: 60px 24px; color: var(--text-dim); }
@@ -70,7 +75,8 @@
     .history-item-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
     .history-store { font-weight: 500; font-size: 15px; }
     .history-total { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--accent); }
-    .history-meta { font-size: 12px; color: var(--text-dim); }
+    .history-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .history-who { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--accent-light); color: var(--accent); font-weight: 500; margin-top: 4px; }
     .history-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
     .btn-delete { padding: 6px 12px; background: none; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--danger); cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .history-detail { display: none; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 12px; }
@@ -80,45 +86,67 @@
     .stat-card .val { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--accent); }
     .stat-card .lbl { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
     .clear-all { width: 100%; padding: 12px; background: none; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; color: var(--danger); cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 8px; }
+    .info-box { background: var(--accent-light); border-radius: var(--radius); padding: 14px 18px; font-size: 13px; color: #4a7a44; margin-bottom: 16px; line-height: 1.5; }
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <h1>Skaner Paragonów</h1>
-    <p>Zrób zdjęcie lub wgraj paragon z galerii</p>
+    <div class="header-sub">
+      <p id="user-label">Rodzinny skaner</p>
+      <span class="sync-label"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">łączenie...</span></span>
+    </div>
   </header>
+
   <div class="tabs">
-    <button class="tab active" onclick="showTab('scan')">Skanuj</button>
-    <button class="tab" onclick="showTab('history')">Historia</button>
+    <button class="tab active" onclick="showTab('scan', event)">Skanuj</button>
+    <button class="tab" onclick="showTab('history', event)">Historia</button>
   </div>
+
   <div class="section active" id="tab-scan">
     <div class="setup-card" id="api-setup">
-      <h3>Klucz API (jednorazowo)</h3>
+      <h3>Klucz API Claude (jednorazowo)</h3>
       <p>Wklej swój klucz z console.anthropic.com. Zapisze się tylko na tym urządzeniu.</p>
       <div class="key-row">
         <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
         <button class="btn-small" onclick="saveKey()">Zapisz</button>
       </div>
     </div>
+
+    <div class="setup-card" id="name-setup">
+      <h3>Jak masz na imię?</h3>
+      <p>Każdy Twój paragon będzie oznaczony imieniem – żona zobaczy kto go dodał.</p>
+      <div class="name-row">
+        <input type="text" id="name-input" placeholder="np. Paweł" maxlength="20">
+        <button class="btn-small" onclick="saveName()">Zapisz</button>
+      </div>
+    </div>
+
     <div class="upload-zone">
       <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
       <span class="upload-icon">📷</span>
       <h3>Zrób zdjęcie lub wybierz z galerii</h3>
       <p>Obsługuje JPG, PNG, HEIC</p>
     </div>
+
     <div id="preview-wrap">
       <img id="preview-img" src="" alt="Podgląd paragonu">
       <button class="remove-img" onclick="removeImage()">×</button>
     </div>
+
     <button class="btn-primary" id="scan-btn" onclick="scanReceipt()" disabled>Skanuj paragon</button>
+
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      <p>Odczytuję paragon...</p>
+      <p id="loading-text">Odczytuję paragon...</p>
     </div>
+
     <div id="result"></div>
   </div>
+
   <div class="section" id="tab-history">
+    <div class="info-box">☁️ Paragony są wspólne – Ty i żona widzicie je w czasie rzeczywistym.</div>
     <div class="stats-bar" id="stats-bar" style="display:none">
       <div class="stat-card">
         <div class="val" id="stat-count">0</div>
@@ -129,182 +157,180 @@
         <div class="lbl">łącznie wydane</div>
       </div>
     </div>
-    <div id="history-list"></div>
+    <div id="history-list"><div class="history-empty"><span>⏳</span><p>Ładowanie...</p></div></div>
   </div>
 </div>
-<script>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7ulYHOV6tg00ug0t-a-qfp1d3Ch8mWFU",
+    authDomain: "paragony-rodzina.firebaseapp.com",
+    projectId: "paragony-rodzina",
+    storageBucket: "paragony-rodzina.firebasestorage.app",
+    messagingSenderId: "399671516471",
+    appId: "1:399671516471:web:a6efaeb3617d9e6dbd0eb2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const col = collection(db, 'paragony');
+
+  const dot = document.getElementById('sync-dot');
+  const syncText = document.getElementById('sync-text');
+  function syncOk() { dot.className = 'sync-dot ok'; syncText.textContent = 'zsynchronizowano'; }
+  function syncErr() { dot.className = 'sync-dot err'; syncText.textContent = 'brak połączenia'; }
+
+  let receipts = [];
   let imageBase64 = null;
   let imageMime = 'image/jpeg';
-  let history = JSON.parse(localStorage.getItem('receipts') || '[]');
 
   function loadKey() {
-    const k = localStorage.getItem('anthropic_key') || '';
-    if (k) document.getElementById('api-setup').style.display = 'none';
-    return k;
+    if (localStorage.getItem('anthropic_key')) document.getElementById('api-setup').style.display = 'none';
+  }
+  function loadName() {
+    const n = localStorage.getItem('user_name');
+    if (n) { document.getElementById('name-setup').style.display = 'none'; document.getElementById('user-label').textContent = 'Witaj, ' + n + '!'; }
   }
 
-  function saveKey() {
+  window.saveKey = () => {
     const v = document.getElementById('api-key-input').value.trim();
     if (!v.startsWith('sk-ant-')) { alert('Klucz musi zaczynać się od sk-ant-'); return; }
     localStorage.setItem('anthropic_key', v);
     document.getElementById('api-setup').style.display = 'none';
-  }
+  };
 
-  function handleFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  window.saveName = () => {
+    const v = document.getElementById('name-input').value.trim();
+    if (!v) { alert('Wpisz swoje imię'); return; }
+    localStorage.setItem('user_name', v);
+    document.getElementById('name-setup').style.display = 'none';
+    document.getElementById('user-label').textContent = 'Witaj, ' + v + '!';
+  };
+
+  window.handleFile = e => {
+    const file = e.target.files[0]; if (!file) return;
     imageMime = file.type || 'image/jpeg';
     const reader = new FileReader();
     reader.onload = ev => {
-      const data = ev.target.result;
-      imageBase64 = data.split(',')[1];
-      document.getElementById('preview-img').src = data;
+      imageBase64 = ev.target.result.split(',')[1];
+      document.getElementById('preview-img').src = ev.target.result;
       document.getElementById('preview-wrap').style.display = 'block';
       document.getElementById('scan-btn').disabled = false;
       document.getElementById('result').style.display = 'none';
-      document.getElementById('result').innerHTML = '';
     };
     reader.readAsDataURL(file);
-  }
+  };
 
-  function removeImage() {
+  window.removeImage = () => {
     imageBase64 = null;
     document.getElementById('preview-wrap').style.display = 'none';
     document.getElementById('preview-img').src = '';
     document.getElementById('scan-btn').disabled = true;
     document.getElementById('file-input').value = '';
     document.getElementById('result').style.display = 'none';
-    document.getElementById('result').innerHTML = '';
-  }
+  };
 
-  async function scanReceipt() {
+  window.scanReceipt = async () => {
     const key = localStorage.getItem('anthropic_key');
     if (!key) { alert('Najpierw zapisz klucz API'); return; }
-    if (!imageBase64) { alert('Najpierw wybierz zdjęcie paragonu'); return; }
+    if (!imageBase64) { alert('Najpierw wybierz zdjęcie'); return; }
+    const userName = localStorage.getItem('user_name') || 'Nieznany';
+
     document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading-text').textContent = 'Odczytuję paragon...';
     document.getElementById('scan-btn').disabled = true;
     document.getElementById('result').style.display = 'none';
-    document.getElementById('result').innerHTML = '';
-    const prompt = `Jesteś asystentem do odczytywania paragonów. Przeanalizuj to zdjęcie paragonu i zwróć dane w formacie JSON (i TYLKO JSON, bez żadnego tekstu przed ani po):
-{"sklep":"nazwa sklepu lub Nieznany","data":"data z paragonu lub null","produkty":[{"nazwa":"nazwa produktu","cena":12.34}],"suma":99.99}
-Jeśli nie możesz odczytać paragonu, zwróć {"blad":"opis problemu"}.`;
+
+    const prompt = `Jesteś asystentem do odczytywania paragonów. Przeanalizuj to zdjęcie i zwróć TYLKO JSON:
+{"sklep":"nazwa sklepu","data":"data lub null","produkty":[{"nazwa":"produkt","cena":12.34}],"suma":99.99}
+Jeśli nie możesz odczytać, zwróć: {"blad":"opis problemu"}`;
+
     try {
       const resp = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageBase64 } },
-            { type: 'text', text: prompt }
-          ]}]
-        })
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageBase64 } },
+          { type: 'text', text: prompt }
+        ]}]})
       });
-      if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || 'Błąd API'); }
+      if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'Błąd API'); }
       const data = await resp.json();
-      const text = data.content.map(b => b.text || '').join('');
-      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-      if (parsed.blad) showError(parsed.blad);
-      else { showResult(parsed); saveToHistory(parsed); }
-    } catch (err) {
-      showError(err.message);
-    } finally {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('scan-btn').disabled = false;
-    }
-  }
+      const parsed = JSON.parse(data.content.map(b => b.text||'').join('').replace(/```json|```/g,'').trim());
+      if (parsed.blad) { showError(parsed.blad); return; }
+      showResult(parsed);
+      document.getElementById('loading-text').textContent = 'Zapisuję do chmury...';
+      document.getElementById('loading').style.display = 'block';
+      await addDoc(col, { ...parsed, dodal: userName, zapisano: new Date().toLocaleDateString('pl-PL'), timestamp: Date.now() });
+      syncOk();
+    } catch(err) { showError(err.message); syncErr(); }
+    finally { document.getElementById('loading').style.display = 'none'; document.getElementById('scan-btn').disabled = false; }
+  };
 
   function showResult(data) {
     const el = document.getElementById('result');
-    const items = (data.produkty || []).map(p => `<div class="item-row"><span class="item-name">${esc(p.nazwa)}</span><span class="item-price">${formatPrice(p.cena)}</span></div>`).join('');
-    el.innerHTML = `<div class="result-card"><div class="result-header"><h3>Paragon</h3><span class="date">${data.data || 'brak daty'}</span></div>${data.sklep ? `<div class="result-store">${esc(data.sklep)}</div>` : ''}<div class="items-list">${items}</div><div class="total-row"><span>Suma</span><span>${formatPrice(data.suma)}</span></div></div>`;
+    const items = (data.produkty||[]).map(p=>`<div class="item-row"><span class="item-name">${esc(p.nazwa)}</span><span class="item-price">${fmt(p.cena)}</span></div>`).join('');
+    el.innerHTML = `<div class="result-card"><div class="result-header"><h3>Paragon</h3><span class="date">${data.data||'brak daty'}</span></div>${data.sklep?`<div class="result-store">${esc(data.sklep)}</div>`:''}<div>${items}</div><div class="total-row"><span>Suma</span><span>${fmt(data.suma)}</span></div></div>`;
     el.style.display = 'block';
   }
 
   function showError(msg) {
     const el = document.getElementById('result');
-    el.innerHTML = `<div class="error-box">Nie udało się odczytać paragonu: ${esc(msg)}</div>`;
+    el.innerHTML = `<div class="error-box">Nie udało się odczytać: ${esc(msg)}</div>`;
     el.style.display = 'block';
   }
 
-  function saveToHistory(data) {
-    const entry = { ...data, id: Date.now(), zapisano: new Date().toLocaleDateString('pl-PL') };
-    history.unshift(entry);
-    localStorage.setItem('receipts', JSON.stringify(history));
-  }
+  onSnapshot(query(col, orderBy('timestamp','desc')), snap => {
+    receipts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    syncOk();
+    if (document.getElementById('tab-history').classList.contains('active')) renderHistory();
+  }, () => syncErr());
 
   function renderHistory() {
     const el = document.getElementById('history-list');
-    const statsBar = document.getElementById('stats-bar');
-    if (!history.length) {
-      statsBar.style.display = 'none';
-      el.innerHTML = `<div class="history-empty"><span>🧾</span><p>Brak zapisanych paragonów.<br>Zeskanuj swój pierwszy paragon!</p></div>`;
-      return;
-    }
-    const total = history.reduce((s, r) => s + (parseFloat(r.suma) || 0), 0);
-    document.getElementById('stat-count').textContent = history.length;
-    document.getElementById('stat-total').textContent = formatPrice(total);
-    statsBar.style.display = 'grid';
-    el.innerHTML = history.map(r => `
-      <div class="history-item" onclick="toggleDetail(${r.id})">
+    const sb = document.getElementById('stats-bar');
+    if (!receipts.length) { sb.style.display='none'; el.innerHTML=`<div class="history-empty"><span>🧾</span><p>Brak paragonów.<br>Zeskanuj pierwszy!</p></div>`; return; }
+    const total = receipts.reduce((s,r)=>s+(parseFloat(r.suma)||0),0);
+    document.getElementById('stat-count').textContent = receipts.length;
+    document.getElementById('stat-total').textContent = fmt(total);
+    sb.style.display = 'grid';
+    el.innerHTML = receipts.map(r=>`
+      <div class="history-item" onclick="toggleDetail('${r.id}')">
         <div class="history-item-top">
           <div>
-            <div class="history-store">${esc(r.sklep || 'Nieznany sklep')}</div>
-            <div class="history-meta">${r.data || ''} • zapisano ${r.zapisano}</div>
+            <div class="history-store">${esc(r.sklep||'Nieznany sklep')}</div>
+            <div class="history-meta">${r.data||''} • ${r.zapisano||''}</div>
+            <span class="history-who">📱 ${esc(r.dodal||'?')}</span>
           </div>
-          <div class="history-total">${formatPrice(r.suma)}</div>
+          <div class="history-total">${fmt(r.suma)}</div>
         </div>
         <div class="history-detail" id="hd-${r.id}">
-          ${(r.produkty || []).map(p => `<div class="item-row"><span class="item-name">${esc(p.nazwa)}</span><span class="item-price">${formatPrice(p.cena)}</span></div>`).join('')}
+          ${(r.produkty||[]).map(p=>`<div class="item-row"><span class="item-name">${esc(p.nazwa)}</span><span class="item-price">${fmt(p.cena)}</span></div>`).join('')}
         </div>
-        <div class="history-actions">
-          <button class="btn-delete" onclick="deleteReceipt(${r.id}, event)">Usuń</button>
-        </div>
+        <div class="history-actions"><button class="btn-delete" onclick="delReceipt('${r.id}',event)">Usuń</button></div>
       </div>`).join('');
-    if (history.length > 1) {
-      el.innerHTML += `<button class="clear-all" onclick="clearAll()">Usuń wszystkie paragony</button>`;
-    }
+    if (receipts.length>1) el.innerHTML+=`<button class="clear-all" onclick="clearAll()">Usuń wszystkie paragony</button>`;
   }
 
-  function toggleDetail(id) {
-    const hd = document.getElementById('hd-' + id);
-    if (hd) hd.style.display = hd.style.display === 'block' ? 'none' : 'block';
-  }
+  window.toggleDetail = id => { const h=document.getElementById('hd-'+id); if(h) h.style.display=h.style.display==='block'?'none':'block'; };
+  window.delReceipt = async (id,e) => { e.stopPropagation(); if(!confirm('Usunąć ten paragon?')) return; await deleteDoc(doc(db,'paragony',id)); };
+  window.clearAll = async () => { if(!confirm('Usunąć wszystkie? Znikną dla wszystkich!')) return; for(const r of receipts) await deleteDoc(doc(db,'paragony',r.id)); };
 
-  function deleteReceipt(id, e) {
-    e.stopPropagation();
-    if (!confirm('Usunąć ten paragon?')) return;
-    history = history.filter(r => r.id !== id);
-    localStorage.setItem('receipts', JSON.stringify(history));
-    renderHistory();
-  }
+  window.showTab = (name, e) => {
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if(e&&e.target) e.target.classList.add('active');
+    if(name==='history') renderHistory();
+  };
 
-  function clearAll() {
-    if (!confirm('Usunąć wszystkie paragony?')) return;
-    history = [];
-    localStorage.setItem('receipts', JSON.stringify(history));
-    renderHistory();
-  }
+  function fmt(v) { if(v==null||isNaN(parseFloat(v))) return '—'; return parseFloat(v).toFixed(2).replace('.',',')+' zł'; }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function showTab(name) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    event.target.classList.add('active');
-    if (name === 'history') renderHistory();
-  }
-
-  function formatPrice(v) {
-    if (v == null || isNaN(parseFloat(v))) return '—';
-    return parseFloat(v).toFixed(2).replace('.', ',') + ' zł';
-  }
-
-  function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  loadKey();
+  loadKey(); loadName();
 </script>
 </body>
 </html>
