@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Paragon">
+  <meta name="theme-color" content="#f7f4ef">
+  <title>Skaner Paragonów</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f4ef;
+      --surface: #ffffff;
+      --accent: #2d5a27;
+      --accent-light: #e8f0e6;
+      --text: #1a1a1a;
+      --text-dim: #888;
+      --border: #e0dbd2;
+      --danger: #c0392b;
+      --radius: 16px;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom, 24px);
+    }
+
+    /* HEADER */
+    header {
+      padding: 52px 24px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    header p {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0;
+      padding: 16px 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-dim);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* SECTIONS */
+    .section { display: none; padding: 24px; }
+    .section.active { display: block; }
+
+    /* API KEY SETUP */
+    .setup-card {
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .setup-card h3 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .setup-card p {
+      font-size: 13px;
+      color: #4a7a44;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .key-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #b8d4b4;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: monospace;
+      background: white;
+      color: var(--text);
+    }
+
+    .key-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+      position: relative;
+    }
+
+    .upload-zone:active { background: var(--accent-light); border-color: var(--accent); }
+
+    .upload-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      font-size: 0;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .upload-zone h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .upload-zone p {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* PREVIEW */
+    #preview-wrap {
+      display: none;
+      margin-top: 16px;
+      position: relative;
+    }
+
+    #preview-wrap img {
+      width: 100%;
+      border-radius: var(--radius);
+      max-height: 300px;
+      object-fit: cover;
+    }
+
+    #preview-wrap .remove-img {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:active { transform: scale(0.98); opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-small {
+      padding: 8px 14px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* LOADING */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 32px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p { font-size: 14px; color: var(--text-dim); }
+
+    /* RESULT */
+    #result { display: none; margin-top: 16px; }
+
+    .result-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .result-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .result-header .date {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .result-store {
+      padding: 12px 20px;
+      background: var(--accent-light);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .items-list { padding: 8px 0; }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .item-row:last-child { border-bottom: none; }
+
+    .item-name { flex: 1; color: var(--text); }
+
+    .item-price {
+      font-weight: 500;
+      color: var(--text);
+      margin-left: 12px;
+      white-space: nowrap;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-top: 2px solid var(--text);
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .error-box {
+      background: #fdf0ef;
+      border: 1px solid #f5c6c2;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--danger);
+      margin-top: 16px;
+    }
+
+    /* HISTORY */
+    .history-empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-dim);
+    }
+
+    .history-empty span { font-size: 48px; display: block; margin-bottom: 12px; }
+    .history-empty p { font-size: 14px; }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .history-item:active { border-color: var(--accent); }
+
+    .history-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .history-store {
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .history-total {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .history-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .history-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .btn-delete {
+      padding: 6px 12px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--danger);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .history-detail {
+      display: none;
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .history-detail .item-row {
+      padding: 6px 0;
+      border-bottom: none;
+      font-size: 13px;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .val {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--accent);
+    }
+
+    .stat-card .lbl {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .clear-all {
+      width: 100%;
+      padding: 12px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      color: var(--danger);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Skaner Paragonów</h1>
+    <p>Zrób zdjęcie lub wgraj paragon z galerii</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('scan')">Skanuj</button>
+    <button class="tab" onclick="showTab('history')">Historia</button>
+  </div>
+
+  <!-- SCAN TAB -->
+  <div class="section active" id="tab-scan">
+
+    <div class="setup-card" id="api-setup">
+      <h3>Klucz API (jednorazowo)</h3>
+      <p>Wklej swój klucz z console.anthropic.com. Zapisze się tylko na tym urządzeniu.</p>
+      <div class="key-row">
+        <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
+        <button class="btn-small" onclick="saveKey()">Zapisz</button>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+      <span class="upload-icon">📷</span>
+      <h3>Zrób zdjęcie lub wybierz z galerii</h3>
+      <p>Obsługuje JPG, PNG, HEIC</p>
+    </div>
+
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="Podgląd paragonu">
+      <button class="remove-img" onclick="removeImage()">×</button>
+    </div>
+
+    <button class="btn-primary" id="scan-btn" onclick="scanReceipt()" disabled>Skanuj paragon</button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Odczytuję paragon...</p>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="section" id="tab-history">
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-card">
+        <div class="val" id="stat-count">0</div>
+        <div class="lbl">paragonów</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="stat-total">0 zł</div>
+        <div class="lbl">łącznie wydane</div>
+      </div>
+    </div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<script>
+  // ─── STATE ───────────────────────────────────────────
+  let imageBase64 = null;
+  let imageMime = 'image/jpeg';
+  let history = JSON.parse(localStorage.getItem('receipts') || '[]');
+
+  // ─── API KEY ──────────────────────────────────────────
+  function loadKey() {
+    const k = localStorage.getItem('anthropic_key') || '';
+    if (k) {
+      document.getElementById('api-setup').style.display = 'none';
+    } else {
+      document.getElementById('api-key-input').value = '';
+    }
+    return k;
+  }
+
+  function saveKey() {
+    const v = document.getElementById('api-key-input').value.trim();
+    if (!v.startsWith('sk-ant-')) { alert('Klucz musi zaczynać się od sk-ant-'); return; }
+    localStorage.setItem('anthropic_key', v);
+    document.getElementById('api-setup').style.display = 'none';
+  }
+
+  // ─── FILE HANDLING ────────────────────────────────────
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    imageMime = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = ev.target.result;
+      imageBase64 = data.split(',')[1];
+      document.getElementById('preview-img').src = data;
+      document.getElementById('preview-wrap').style.display = 'block';
+      document.getElementById('scan-btn').disabled = false;
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('result').innerHTML = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    imageBase64 = null;
+    document.getElementById('preview-wrap').style.display = 'none';
+    document.getElementById('preview-img').src = '';
+    document.getElementById('scan-btn').disabled = true;
+    document.getElementById('file-input').value = '';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('result').innerHTML = '';
+  }
+
+  // ─── SCAN ─────────────────────────────────────────────
+  async function scanReceipt() {
+    const key = localStorage.getItem('anthropic_key');
+    if (!key) { alert('Najpierw zapisz klucz API'); return; }
+    if (!imageBase64) { alert('Najpierw wybierz zdjęcie paragonu'); return; }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('scan-btn').disabled = true;
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('result').innerHTML = '';
+
+    const prompt = `Jesteś asystentem do odczytywania paragonów. Przeanalizuj to zdjęcie paragonu i zwróć dane w formacie JSON (i TYLKO JSON, bez żadnego tekstu przed ani po):
+{
+  "sklep": "nazwa sklepu lub 'Nieznany'",
+  "data": "data z paragonu lub null",
+  "produkty": [
+    {"nazwa": "nazwa produktu", "cena": 12.34}
+  ],
+  "suma": 99.99
+}
+Jeśli nie możesz odczytać paragonu, zwróć {"blad": "opis problemu"}.`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageBase64 } },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error?.message || 'Błąd API');
+      }
+
+      const data = await resp.json();
+      const text = data.content.map(b => b.text || '').join('');
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      if (parsed.blad) {
+        showError(parsed.blad);
+      } else {
+        showResult(parsed);
+        saveToHistory(parsed);
+      }
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('scan-btn').disabled = false;
+    }
+  }
+
+  // ─── DISPLAY RESULT ───────────────────────────────────
+  function showResult(data) {
+    const el = document.getElementById('result');
+    const items = (data.produkty || []).map(p => `
+      <div class="item-row">
+        <span class="item-name">${esc(p.nazwa)}</span>
+        <span class="item-price">${formatPrice(p.cena)}</span>
+      </div>`).join('');
+
+    el.innerHTML = `
+      <div class="result-card">
+        <div class="result-header">
+          <h3>Paragon</h3>
+          <span class="date">${data.data || 'brak daty'}</span>
+        </div>
+        ${data.sklep ? `<div class="result-store">${esc(data.sklep)}</div>` : ''}
+        <div class="items-list">${items}</div>
+        <div class="total-row">
+          <span>Suma</span>
+          <span>${formatPrice(data.suma)}</span>
+        </div>
+      </div>`;
+    el.style.display = 'block';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('result');
+    el.innerHTML = `<div class="error-box">Nie udało się odczytać paragonu: ${esc(msg)}</div>`;
+    el.style.display = 'block';
+  }
+
+  // ─── HISTORY ──────────────────────────────────────────
+  function saveToHistory(data) {
+    const entry = { ...data, id: Date.now(), zapisano: new Date().toLocaleDateString('pl-PL') };
+    history.unshift(entry);
+    localStorage.setItem('receipts', JSON.stringify(history));
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('history-list');
+    const statsBar = document.getElementById('stats-bar');
+
+    if (!history.length) {
+      statsBar.style.display = 'none';
+      el.innerHTML = `<div class="history-empty"><span>🧾</span><p>Brak zapisanych paragonów.<br>Zeskanuj swój pierwszy paragon!</p></div>`;
+      return;
+    }
+
+    const total = history.reduce((s, r) => s + (parseFloat(r.suma) || 0), 0);
+    document.getElementById('stat-count').textContent = history.length;
+    document.getElementById('stat-total').textContent = formatPrice(total);
+    statsBar.style.display = 'grid';
+
+    el.innerHTML = history.map((r, i) => `
+      <div class="history-item" id="hi-${r.id}">
+        <div class="history-item-top">
+          <div>
+            <div class="history-store">${esc(r.sklep || 'Nieznany sklep')}</div>
+            <div class="history-meta">${r.data || ''} • zapisano ${r.zapisano}</div>
+          </div>
+          <div class="history-total">${formatPrice(r.suma)}</div>
+        </div>
+        <div class="history-detail" id="hd-${r.id}">
+          ${(r.produkty || []).map(p => `
+            <div class="item-row">
+              <span class="item-name">${esc(p.nazwa)}</span>
+              <span class="item-price">${formatPrice(p.cena)}</span>
+            </div>`).join('')}
+        </div>
+        <div class="history-actions">
+          <button class="btn-delete" onclick="deleteReceipt(${r.id}, event)">Usuń</button>
+        </div>
+      </div>`).join('');
+
+    // toggle detail on click
+    history.forEach(r => {
+      const hi = document.getElementById('hi-' + r.id);
+      const hd = document.getElementById('hd-' + r.id);
+      if (hi && hd) {
+        hi.addEventListener('click', () => {
+          hd.style.display = hd.style.display === 'block' ? 'none' : 'block';
+        });
+      }
+    });
+
+    if (history.length > 1) {
+      el.innerHTML += `<button class="clear-all" onclick="clearAll()">Usuń wszystkie paragony</button>`;
+    }
+  }
+
+  function deleteReceipt(id, e) {
+    e.stopPropagation();
+    if (!confirm('Usunąć ten paragon?')) return;
+    history = history.filter(r => r.id !== id);
+    localStorage.setItem('receipts', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function clearAll() {
+    if (!confirm('Usunąć wszystkie paragony?')) return;
+    history = [];
+    localStorage.setItem('receipts', JSON.stringify(history));
+    renderHistory();
+  }
+
+  // ─── TABS ─────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'history') renderHistory();
+  }
+
+  // ─── UTILS ────────────────────────────────────────────
+  function formatPrice(v) {
+    if (v == null || isNaN(parseFloat(v))) return '—';
+    return parseFloat(v).toFixed(2).replace('.', ',') + ' zł';
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ─── INIT ─────────────────────────────────────────────
+  loadKey();
+</script>
+</body>
+</html>
